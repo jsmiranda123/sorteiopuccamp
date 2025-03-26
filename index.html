@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorteio de Participantes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background: #f0f0f0;
+    }
+    h1 {
+      color: #333;
+    }
+    input, button {
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin: 0.5rem;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: white;
+      margin: 0.3rem auto;
+      padding: 0.5rem;
+      width: 200px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    #resultado {
+      font-size: 1.5rem;
+      color: green;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Participe do Sorteio!</h1>
+  <input type="text" id="nome" placeholder="Digite seu nome">
+  <button onclick="adicionarParticipante()">Entrar no Sorteio</button>
+
+  <h2>Participantes:</h2>
+  <ul id="listaParticipantes"></ul>
+
+  <button onclick="sortear()">Sortear</button>
+  <button onclick="limparParticipantes()">Limpar Participantes</button>
+
+  <div id="resultado"></div>
+
+  <script>
+    let participantes = [];
+
+    function salvarParticipantes() {
+      localStorage.setItem("participantes", JSON.stringify(participantes));
+    }
+
+    function carregarParticipantes() {
+      const dados = localStorage.getItem("participantes");
+      if (dados) {
+        participantes = JSON.parse(dados);
+        atualizarLista();
+      }
+    }
+
+    function adicionarParticipante() {
+      const nomeInput = document.getElementById("nome");
+      const nome = nomeInput.value.trim();
+      if (nome) {
+        participantes.push(nome);
+        salvarParticipantes();
+        atualizarLista();
+        nomeInput.value = "";
+      }
+    }
+
+    function atualizarLista() {
+      const lista = document.getElementById("listaParticipantes");
+      lista.innerHTML = "";
+      participantes.forEach(p => {
+        const li = document.createElement("li");
+        li.textContent = p;
+        lista.appendChild(li);
+      });
+    }
+
+    function sortear() {
+      if (participantes.length === 0) {
+        alert("Nenhum participante no sorteio!");
+        return;
+      }
+      const indice = Math.floor(Math.random() * participantes.length);
+      const vencedor = participantes[indice];
+      document.getElementById("resultado").textContent = `🎉 Vencedor: ${vencedor} 🎉`;
+    }
+
+    function limparParticipantes() {
+      if (confirm("Tem certeza que deseja limpar todos os participantes?")) {
+        participantes = [];
+        localStorage.removeItem("participantes");
+        atualizarLista();
+        document.getElementById("resultado").textContent = "";
+      }
+    }
+
+    // Carregar participantes salvos ao iniciar
+    window.onload = carregarParticipantes;
+  </script>
+</body>
+</html>
