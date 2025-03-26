@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sorteio de Participantes</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -52,37 +54,40 @@
   <div id="resultado"></div>
 
   <script>
-    let participantes = [];
+    // Configuração real do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyATLARnNuHRemdiXG1MgLJZhuLYoAPw4H4",
+      authDomain: "sorteiopuccamp.firebaseapp.com",
+      databaseURL: "https://sorteiopuccamp-default-rtdb.firebaseio.com",
+      projectId: "sorteiopuccamp",
+      storageBucket: "sorteiopuccamp.firebasestorage.app",
+      messagingSenderId: "1034017445448",
+      appId: "1:1034017445448:web:692b46b7afbd45b798aa7d",
+      measurementId: "G-6J1YRY0G9W"
+    };
 
-    function salvarParticipantes() {
-      localStorage.setItem("participantes", JSON.stringify(participantes));
-    }
-
-    function carregarParticipantes() {
-      const dados = localStorage.getItem("participantes");
-      if (dados) {
-        participantes = JSON.parse(dados);
-        atualizarLista();
-      }
-    }
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const participantesRef = database.ref("participantes");
 
     function adicionarParticipante() {
       const nomeInput = document.getElementById("nome");
       const nome = nomeInput.value.trim();
       if (nome) {
-        participantes.push(nome);
-        salvarParticipantes();
-        atualizarLista();
+        participantesRef.push(nome);
         nomeInput.value = "";
       }
     }
 
-    function atualizarLista() {
+    function atualizarLista(snapshot) {
       const lista = document.getElementById("listaParticipantes");
       lista.innerHTML = "";
-      participantes.forEach(p => {
+      participantes = [];
+      snapshot.forEach(childSnapshot => {
+        const nome = childSnapshot.val();
+        participantes.push(nome);
         const li = document.createElement("li");
-        li.textContent = p;
+        li.textContent = nome;
         lista.appendChild(li);
       });
     }
@@ -99,15 +104,14 @@
 
     function limparParticipantes() {
       if (confirm("Tem certeza que deseja limpar todos os participantes?")) {
-        participantes = [];
-        localStorage.removeItem("participantes");
-        atualizarLista();
+        participantesRef.remove();
         document.getElementById("resultado").textContent = "";
       }
     }
 
-    // Carregar participantes salvos ao iniciar
-    window.onload = carregarParticipantes;
+    // Escutar mudanças em tempo real
+    let participantes = [];
+    participantesRef.on("value", atualizarLista);
   </script>
 </body>
 </html>
