@@ -70,11 +70,13 @@
     const database = firebase.database();
     const participantesRef = database.ref("participantes");
 
+    let participantes = []; // Declarado no escopo global
+
     function adicionarParticipante() {
       const nomeInput = document.getElementById("nome");
       const nome = nomeInput.value.trim();
       if (nome) {
-        participantesRef.push(nome);
+        participantesRef.push({ nome });
         nomeInput.value = "";
       }
     }
@@ -84,11 +86,14 @@
       lista.innerHTML = "";
       participantes = [];
       snapshot.forEach(childSnapshot => {
-        const nome = childSnapshot.val();
-        participantes.push(nome);
-        const li = document.createElement("li");
-        li.textContent = nome;
-        lista.appendChild(li);
+        const data = childSnapshot.val();
+        const nome = data.nome;
+        if (nome) {
+          participantes.push(nome);
+          const li = document.createElement("li");
+          li.textContent = nome;
+          lista.appendChild(li);
+        }
       });
     }
 
@@ -110,7 +115,6 @@
     }
 
     // Escutar mudanças em tempo real
-    let participantes = [];
     participantesRef.on("value", atualizarLista);
   </script>
 </body>
